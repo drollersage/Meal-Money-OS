@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juan's OS 5.1 (Fixed)</title>
+    <title>Juan's OS 5.2 (Dark Only)</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,15 +28,14 @@
     </script>
     <style>
         /* --- BOMBPROOF DARK MODE INPUTS --- */
-        /* We use standard CSS with !important to override Browser defaults */
-        
+        /* Forces inputs to be dark grey with white text, overriding browser defaults */
         .inp {
             width: 100%;
             padding: 0.75rem 1rem;
             border-radius: 0.75rem;
             border: 1px solid #334155;
-            background-color: #1e293b !important; /* Force Dark Grey */
-            color: white !important;              /* Force White Text */
+            background-color: #1e293b !important; 
+            color: white !important;              
             font-size: 0.875rem;
             outline: none;
             transition: all 0.2s;
@@ -44,7 +43,7 @@
         
         .inp:focus {
             border-color: #10b981;
-            background-color: #0f172a !important; /* Darker on focus */
+            background-color: #0f172a !important; 
             box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
         }
 
@@ -58,8 +57,8 @@
             margin-bottom: 0.35rem;
         }
 
-        /* --- THE AUTOFILL HACK --- */
-        /* This stops Chrome from turning the box white when it autofills */
+        /* --- AUTOFILL HACK --- */
+        /* Stops Chrome from turning the box white when it autofills */
         input:-webkit-autofill,
         input:-webkit-autofill:hover, 
         input:-webkit-autofill:focus, 
