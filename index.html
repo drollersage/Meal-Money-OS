@@ -117,13 +117,16 @@
                     </div>
                     <div class="grid grid-cols-3 gap-4 text-center relative z-10">
                         <div class="bg-slate-800/50 rounded-lg p-2 border border-slate-700">
-                            <p class="text-[10px] text-slate-400 font-bold">PRO</p><p class="text-sm font-semibold text-emerald-400" id="dash-pro-val">0g</p>
+                            <p class="text-[10px] text-slate-400 font-bold">PROTEIN</p>
+                            <p class="text-xs font-medium text-emerald-400 mt-1"><span id="dash-pro-val" class="text-sm font-bold text-white">0</span> / <span id="dash-pro-goal">0</span>g</p>
                         </div>
                         <div class="bg-slate-800/50 rounded-lg p-2 border border-slate-700">
-                            <p class="text-[10px] text-slate-400 font-bold">CARB</p><p class="text-sm font-semibold text-blue-400" id="dash-carb-val">0g</p>
+                            <p class="text-[10px] text-slate-400 font-bold">CARBS</p>
+                            <p class="text-xs font-medium text-blue-400 mt-1"><span id="dash-carb-val" class="text-sm font-bold text-white">0</span> / <span id="dash-carb-goal">0</span>g</p>
                         </div>
                         <div class="bg-slate-800/50 rounded-lg p-2 border border-slate-700">
-                            <p class="text-[10px] text-slate-400 font-bold">FAT</p><p class="text-sm font-semibold text-orange-400" id="dash-fat-val">0g</p>
+                            <p class="text-[10px] text-slate-400 font-bold">FATS</p>
+                            <p class="text-xs font-medium text-orange-400 mt-1"><span id="dash-fat-val" class="text-sm font-bold text-white">0</span> / <span id="dash-fat-goal">0</span>g</p>
                         </div>
                     </div>
                 </div>
@@ -428,7 +431,9 @@
         function renderAll() {
             renderDailyLog(); renderRecipes(); renderGroceries(); updateStats(); renderWeightChart();
             document.getElementById('set-cals').value = appData.settings.goals.cals;
-            // ... (rest of goal inputs)
+            document.getElementById('set-pro').value = appData.settings.goals.pro;
+            document.getElementById('set-carb').value = appData.settings.goals.carb;
+            document.getElementById('set-fat').value = appData.settings.goals.fat;
         }
 
         function updateStats() {
@@ -440,11 +445,20 @@
                 if(r) { total.cals += parseInt(r.cals)||0; total.pro += parseInt(r.protein)||0; total.carb += parseInt(r.carbs)||0; total.fat += parseInt(r.fats)||0; }
             });
             const g = appData.settings.goals;
+            
             document.getElementById('dash-cals-rem').innerText = g.cals - total.cals; // SHOW REMAINING
             document.getElementById('dash-cals-goal').innerText = g.cals;
-            document.getElementById('dash-pro-val').innerText = total.pro + 'g';
-            document.getElementById('dash-carb-val').innerText = total.carb + 'g';
-            document.getElementById('dash-fat-val').innerText = total.fat + 'g';
+            
+            // UPDATE MACRO LABELS
+            document.getElementById('dash-pro-val').innerText = total.pro;
+            document.getElementById('dash-pro-goal').innerText = g.pro;
+            
+            document.getElementById('dash-carb-val').innerText = total.carb;
+            document.getElementById('dash-carb-goal').innerText = g.carb;
+            
+            document.getElementById('dash-fat-val').innerText = total.fat;
+            document.getElementById('dash-fat-goal').innerText = g.fat;
+            
             const pct = Math.min(100, Math.round((total.cals / g.cals) * 100));
             document.getElementById('dash-bar').style.width = pct + "%";
         }
@@ -470,7 +484,35 @@
         window.removeFromLog = (meal, idx) => { appData.dailyLogs[currentDate][meal].splice(idx, 1); saveToCloud(); }
         
         // --- STANDARD FUNCTIONS (Restored) ---
-        window.completeOnboarding = () => { /* Same logic as v5.2 */ appData.settings.onboarded=true; saveToCloud(); document.getElementById('onboarding-modal').classList.add('hidden'); }
+        window.completeOnboarding = () => { 
+            // ... (same as before) 
+            const weight = parseFloat(document.getElementById('ob-weight').value); 
+            const ft = parseFloat(document.getElementById('ob-ft').value);
+            const inch = parseFloat(document.getElementById('ob-in').value);
+            const age = parseFloat(document.getElementById('ob-age').value);
+            const gender = document.getElementById('ob-gender').value;
+            const activity = parseFloat(document.getElementById('ob-activity').value);
+            const goalOffset = parseFloat(document.getElementById('ob-goal').value);
+
+            if(!weight || !age) return alert("Please fill in all fields");
+
+            const weightKg = weight * 0.453592;
+            const heightCm = ((ft * 12) + inch) * 2.54;
+            let bmr = (10 * weightKg) + (6.25 * heightCm) - (5 * age);
+            bmr += (gender === 'male' ? 5 : -161);
+
+            const tdee = Math.round(bmr * activity);
+            const targetCals = tdee + goalOffset;
+            const pro = Math.round(weight); 
+            const fat = Math.round((targetCals * 0.25) / 9); 
+            const carb = Math.round((targetCals - (pro * 4) - (fat * 9)) / 4); 
+
+            appData.settings.goals = { cals: targetCals, pro: pro, carb: carb, fat: fat };
+            appData.settings.onboarded=true; 
+            saveToCloud(); 
+            document.getElementById('onboarding-modal').classList.add('hidden'); 
+        }
+        
         window.resetProfile = () => { if(confirm("Reset?")) { appData.settings.onboarded=false; saveToCloud(); closeSettings(); } }
         window.closePicker = () => document.getElementById('picker-modal').classList.add('hidden');
         window.closeModal = () => document.getElementById('recipe-modal').classList.add('hidden');
@@ -479,7 +521,6 @@
         window.openModal = () => document.getElementById('recipe-modal').classList.remove('hidden');
         window.switchTab = (tab) => { ['log','recipes','grocery'].forEach(t => { document.getElementById(`view-${t}`).classList.add('hidden'); document.getElementById(`tab-${t}`).classList.replace('border-emerald-500', 'border-transparent'); document.getElementById(`tab-${t}`).classList.remove('text-white'); document.getElementById(`tab-${t}`).classList.add('text-slate-400'); }); document.getElementById(`view-${tab}`).classList.remove('hidden'); document.getElementById(`tab-${tab}`).classList.replace('border-transparent', 'border-emerald-500'); document.getElementById(`tab-${tab}`).classList.add('text-white'); document.getElementById(`tab-${tab}`).classList.remove('text-slate-400'); }
         
-        // Rest of CRUD functions (Add Grocery, Save Recipe etc) same as v5.2...
         window.addGrocery = () => { const name=document.getElementById('grocery-name').value, price=document.getElementById('grocery-price').value, freq=document.getElementById('grocery-freq').value, url=document.getElementById('grocery-url').value; if(!name||!price) return; appData.groceries.push({id:Date.now(), name, price:parseFloat(price), freq, url}); document.getElementById('grocery-name').value=''; document.getElementById('grocery-price').value=''; saveToCloud(); }
         window.renderGroceries = () => { const list=document.getElementById('grocery-list'); list.innerHTML=''; appData.groceries.forEach(i => { let p=parseFloat(i.price), c=i.freq==='weekly'?p*4:i.freq==='biweekly'?p*2:p; let badge=i.freq==='weekly'?'bg-orange-900/30 text-orange-400':i.freq==='biweekly'?'bg-blue-900/30 text-blue-400':'bg-purple-900/30 text-purple-400'; list.innerHTML+=`<div class="grid grid-cols-12 border-b border-slate-800 p-3 items-center text-sm text-slate-300"><div class="col-span-5 font-medium">${i.name} ${i.url?`<a href="${i.url}" target="_blank" class="text-blue-400 ml-1"><i class="fa-solid fa-link"></i></a>`:''}</div><div class="col-span-2 text-center">$${p.toFixed(2)}</div><div class="col-span-2 text-center"><span class="${badge} text-[10px] px-2 py-1 rounded uppercase">${i.freq}</span></div><div class="col-span-2 text-right font-bold">$${c.toFixed(2)}</div><div class="col-span-1 text-center"><button onclick="delGroc(${i.id})" class="text-slate-500 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></div></div>`; }); }
         window.delGroc = (id) => { appData.groceries=appData.groceries.filter(i=>i.id!==id); saveToCloud(); }
@@ -487,7 +528,19 @@
         window.editRecipe = (id) => { const r=appData.recipes.find(x=>x.id===id); if(!r)return; openModal(); document.getElementById('edit-id').value=id; document.getElementById('input-title').value=r.title; document.getElementById('input-time').value=r.time; document.getElementById('input-cals').value=r.cals; document.getElementById('input-protein').value=r.protein; document.getElementById('input-carbs').value=r.carbs; document.getElementById('input-fats').value=r.fats; document.getElementById('input-tags').value=r.tags; document.getElementById('input-desc').value=r.ingredients; }
         window.saveRecipe = () => { const id=document.getElementById('edit-id').value; const nr={ title:document.getElementById('input-title').value, time:document.getElementById('input-time').value, cals:parseInt(document.getElementById('input-cals').value)||0, protein:parseInt(document.getElementById('input-protein').value)||0, carbs:parseInt(document.getElementById('input-carbs').value)||0, fats:parseInt(document.getElementById('input-fats').value)||0, tags:document.getElementById('input-tags').value, ingredients:document.getElementById('input-desc').value }; if(!nr.title)return; if(id){ const idx=appData.recipes.findIndex(x=>x.id==id); if(idx>-1) appData.recipes[idx]={id:parseInt(id),...nr}; } else { appData.recipes.push({id:Date.now(),...nr}); } saveToCloud(); closeModal(); }
         window.deleteRecipe = () => { if(confirm("Delete?")) { appData.recipes=appData.recipes.filter(x=>x.id!=document.getElementById('edit-id').value); saveToCloud(); closeModal(); }};
-        window.saveSettings = () => { appData.settings.goals = { cals: parseInt(document.getElementById('set-cals').value)||0, pro: parseInt(document.getElementById('set-pro').value)||0, carb: parseInt(document.getElementById('set-carb').value)||0, fat: parseInt(document.getElementById('set-fat').value)||0 }; saveToCloud(); closeSettings(); }
+        
+        // --- IMPORTANT FIX HERE ---
+        window.saveSettings = () => { 
+            appData.settings.goals = { 
+                cals: parseInt(document.getElementById('set-cals').value)||0, 
+                pro: parseInt(document.getElementById('set-pro').value)||0, 
+                carb: parseInt(document.getElementById('set-carb').value)||0, 
+                fat: parseInt(document.getElementById('set-fat').value)||0 
+            }; 
+            saveToCloud(); 
+            renderAll(); // Force Update
+            closeSettings(); 
+        }
         window.clearDailyLog = () => { if(confirm("Clear log?")) { appData.dailyLogs[currentDate] = { breakfast: [], lunch: [], dinner: [], snacks: [] }; saveToCloud(); } }
 
     </script>
