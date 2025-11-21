@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juan's Meal & Money OS 3.0</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { 
+                        slate: { 850: '#1e293b', 900: '#0f172a' },
+                        darkbg: '#0f172a',
+                        darkcard: '#1e293b'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .modal-panel { transition: transform 0.3s ease-in-out; }
+        .modal-hidden .modal-panel { transform: translateX(100%); }
+        .modal-visible .modal-panel { transform: translateX(0); }
+        
+        /* Progress Bar Animations */
+        .progress-bar { transition: width 1s ease-in-out; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-darkbg dark:text-slate-100 min-h-screen p-2 md:p-6 transition-colors duration-300">
+
+    <div id="login-screen" class="fixed inset-0 z-[60] bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
+        <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-2xl max-w-md w-full border border-slate-100 dark:border-slate-700">
+            <div class="bg-emerald-500 text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl shadow-lg">
+                ⚡
+            </div>
+            <h1 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Juan's OS 3.0</h1>
+            <p class="text-slate-500 dark:text-slate-400 mb-8">Sync your Nutrition & Budget across devices.</p>
+            
+            <button id="btn-login" class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all shadow-sm">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-6 h-6" alt="Google">
+                <span>Continue with Google</span>
+            </button>
+            <p id="login-status" class="mt-4 text-sm text-slate-400 h-5"></p>
+        </div>
+    </div>
+
+    <div id="app-container" class="max-w-6xl mx-auto bg-white dark:bg-darkcard min-h-[85vh] rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 overflow-hidden relative hidden flex flex-col">
+        
+        <div class="bg-white dark:bg-darkcard p-4 md:p-6 border-b border-slate-100 dark:border-slate-700 sticky top-0 z-20">
+            <div class="flex justify-between items-center mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="bg-slate-900 dark:bg-emerald-600 text-white w-10 h-10 rounded-lg flex items-center justify-center shadow-md">
+                        <i class="fa-solid fa-dumbbell"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Juan's OS</h1>
+                        <div class="text-xs text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                            <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div> Online
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="openSettings()" class="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors flex items-center justify-center">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 flex flex-col justify-between">
+                    <div class="flex justify-between items-start mb-2">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Monthly Burn</p>
+                        <i class="fa-solid fa-wallet text-slate-300"></i>
+                    </div>
+                    <div>
+                        <p class="text-2xl font-bold text-slate-800 dark:text-white" id="stat-monthly">$0.00</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Bi-Weekly: <span id="stat-biweekly" class="font-semibold text-emerald-600 dark:text-emerald-400">$0.00</span></p>
+                    </div>
+                </div>
+
+                <div class="md:col-span-2 bg-slate-900 dark:bg-slate-800 p-4 rounded-xl border border-slate-800 dark:border-slate-700 text-white shadow-lg relative overflow-hidden">
+                    <div class="absolute right-0 top-0 opacity-10 text-9xl -mr-4 -mt-4 rotate-12 pointer-events-none">
+                        <i class="fa-solid fa-fire"></i>
+                    </div>
+
+                    <div class="relative z-10 flex flex-col h-full justify-between">
+                        <div class="flex justify-between items-end mb-3">
+                            <div>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Daily Calories</p>
+                                <div class="flex items-baseline gap-2">
+                                    <p class="text-3xl font-bold text-white" id="dash-cals-val">0</p>
+                                    <p class="text-sm text-slate-400">/ <span id="dash-cals-goal">2100</span> kcal</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs font-bold text-emerald-400 uppercase" id="dash-pct">0%</p>
+                            </div>
+                        </div>
+                        
+                        <div class="w-full bg-slate-700 rounded-full h-2 mb-4">
+                            <div id="dash-bar" class="bg-emerald-500 h-2 rounded-full progress-bar" style="width: 0%"></div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div class="bg-slate-800/50 rounded-lg p-2 border border-slate-700">
+                                <p class="text-[10px] text-slate-400 uppercase font-bold">Protein</p>
+                                <p class="text-sm font-semibold"><span id="dash-pro-val" class="text-emerald-400">0</span> / <span id="dash-pro-goal">180</span>g</p>
+                            </div>
+                            <div class="bg-slate-800/50 rounded-lg p-2 border border-slate-700">
+                                <p class="text-[10px] text-slate-400 uppercase font-bold">Carbs</p>
+                                <p class="text-sm font-semibold"><span id="dash-carb-val" class="text-blue-400">0</span> / <span id="dash-carb-goal">210</span>g</p>
+                            </div>
+                            <div class="bg-slate-800/50 rounded-lg p-2 border border-slate-700">
+                                <p class="text-[10px] text-slate-400 uppercase font-bold">Fats</p>
+                                <p class="text-sm font-semibold"><span id="dash-fat-val" class="text-orange-400">0</span> / <span id="dash-fat-goal">60</span>g</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex border-b border-slate-100 dark:border-slate-700 px-6 bg-white dark:bg-darkcard">
+            <button onclick="switchTab('log')" id="tab-log" class="px-4 md:px-6 py-3 text-sm font-medium border-b-2 border-slate-900 dark:border-emerald-500 text-slate-900 dark:text-white transition-colors">
+                <i class="fa-solid fa-calendar-day mr-2"></i>Daily Log
+            </button>
+            <button onclick="switchTab('recipes')" id="tab-recipes" class="px-4 md:px-6 py-3 text-sm font-medium border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
+                <i class="fa-solid fa-utensils mr-2"></i>Cookbook
+            </button>
+            <button onclick="switchTab('grocery')" id="tab-grocery" class="px-4 md:px-6 py-3 text-sm font-medium border-b-2 border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors">
+                <i class="fa-solid fa-cart-shopping mr-2"></i>Money
+            </button>
+        </div>
+
+        <div class="p-4 md:p-6 bg-slate-50/50 dark:bg-slate-900/50 flex-1 overflow-y-auto">
+            
+            <div id="view-log" class="animate-fade-in block space-y-6">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-semibold text-slate-700 dark:text-slate-200">Today's Intake</h2>
+                    <button onclick="clearDailyLog()" class="text-xs text-slate-400 hover:text-red-500">Clear Day</button>
+                </div>
+
+                <div id="log-container" class="space-y-4">
+                    </div>
+            </div>
+
+            <div id="view-recipes" class="animate-fade-in hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-lg font-semibold text-slate-700 dark:text-slate-200">My Cookbook</h2>
+                    <button onclick="openModal()" class="bg-slate-900 dark:bg-emerald-600 hover:opacity-90 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Add New
+                    </button>
+                </div>
+                <div id="recipe-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+
+            <div id="view-grocery" class="animate-fade-in hidden">
+                <h2 class="text-lg font-semibold text-slate-700 dark:text-slate-200 mb-4">Budget Planner</h2>
+                <div class="bg-white dark:bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+                        <div class="col-span-12 md:col-span-4">
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Item Name</label>
+                            <input type="text" id="grocery-name" placeholder="e.g., Greek Yogurt" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-sm outline-none focus:border-slate-400">
+                        </div>
+                        <div class="col-span-6 md:col-span-2">
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Price ($)</label>
+                            <input type="number" step="0.01" id="grocery-price" placeholder="0.00" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-sm outline-none focus:border-slate-400">
+                        </div>
+                        <div class="col-span-6 md:col-span-2">
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Frequency</label>
+                            <select id="grocery-freq" class="w-full px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-sm outline-none">
+                                <option value="weekly">Weekly (x4)</option>
+                                <option value="biweekly">Bi-Weekly (x2)</option>
+                                <option value="monthly">Monthly (x1)</option>
+                            </select>
+                        </div>
+                        <div class="col-span-12 md:col-span-3">
+                             <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Link (Optional)</label>
+                             <div class="relative">
+                                <i class="fa-solid fa-link absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                                <input type="text" id="grocery-url" placeholder="https://..." class="w-full pl-8 pr-3 py-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-sm outline-none focus:border-slate-400">
+                             </div>
+                        </div>
+                        <div class="col-span-12 md:col-span-1">
+                            <button onclick="addGrocery()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm h-[38px] flex items-center justify-center">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
+                    <div class="grid grid-cols-12 bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 p-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                        <div class="col-span-5">Item</div>
+                        <div class="col-span-2 text-center">Price</div>
+                        <div class="col-span-2 text-center">Freq</div>
+                        <div class="col-span-2 text-right">Mo. Cost</div>
+                        <div class="col-span-1 text-center">Act</div>
+                    </div>
+                    <div id="grocery-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="recipe-modal" class="fixed inset-0 z-[50] hidden modal-hidden">
+        <div class="absolute inset-0 bg-slate-900/20 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="absolute inset-y-0 right-0 max-w-lg w-full bg-white dark:bg-slate-800 shadow-2xl modal-panel flex flex-col h-full border-l border-slate-100 dark:border-slate-700">
+            <div class="p-6 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
+                <h2 class="text-lg font-bold text-slate-800 dark:text-white" id="modal-title-text">Add Recipe</h2>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div class="p-6 flex-1 overflow-y-auto space-y-5">
+                <input type="hidden" id="edit-id">
+                <div><label class="lbl">Recipe Title</label><input type="text" id="input-title" class="inp"></div>
+                <div class="grid grid-cols-2 gap-4">
+                     <div><label class="lbl">Prep Time</label><input type="text" id="input-time" class="inp"></div>
+                    <div><label class="lbl">Calories</label><input type="number" id="input-cals" class="inp"></div>
+                </div>
+                <div class="bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <label class="lbl mb-3">Macros (g)</label>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div><label class="text-[10px] text-slate-400 mb-1">Protein</label><input type="number" id="input-protein" class="inp border-emerald-200 focus:border-emerald-500"></div>
+                        <div><label class="text-[10px] text-slate-400 mb-1">Carbs</label><input type="number" id="input-carbs" class="inp border-blue-200 focus:border-blue-500"></div>
+                        <div><label class="text-[10px] text-slate-400 mb-1">Fats</label><input type="number" id="input-fats" class="inp border-orange-200 focus:border-orange-500"></div>
+                    </div>
+                </div>
+                <div><label class="lbl">Tags</label><input type="text" id="input-tags" class="inp" placeholder="Breakfast, Quick"></div>
+                <div><label class="lbl">Ingredients</label><textarea id="input-desc" rows="8" class="inp resize-none"></textarea></div>
+            </div>
+            <div class="p-6 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 flex justify-between items-center">
+                <button id="btn-delete-recipe" class="text-red-500 hidden" onclick="deleteRecipe()">Delete</button>
+                <div class="flex gap-3 ml-auto">
+                    <button onclick="closeModal()" class="px-4 py-2 text-slate-600 dark:text-slate-400 font-medium text-sm hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg">Cancel</button>
+                    <button onclick="saveRecipe()" class="px-6 py-2 bg-slate-900 dark:bg-emerald-600 text-white font-medium text-sm rounded-lg shadow-md hover:opacity-90">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="fixed inset-0 z-[70] hidden">
+        <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closeSettings()"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl shadow-2xl p-6 border border-slate-100 dark:border-slate-700">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white">Settings</h2>
+                <button onclick="closeSettings()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="flex justify-between items-center mb-6 pb-6 border-b border-slate-100 dark:border-slate-700">
+                <div>
+                    <p class="font-semibold text-slate-800 dark:text-white">Appearance</p>
+                    <p class="text-xs text-slate-500">Toggle Light/Dark Mode</p>
+                </div>
+                <button onclick="toggleTheme()" class="bg-slate-200 dark:bg-slate-600 relative inline-flex h-6 w-11 items-center rounded-full transition-colors">
+                    <span class="translate-x-1 dark:translate-x-6 inline-block h-4 w-4 transform rounded-full bg-white transition-transform"></span>
+                </button>
+            </div>
+
+            <div class="space-y-4 mb-6">
+                <p class="font-semibold text-slate-800 dark:text-white">Nutrition Targets</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div><label class="lbl">Daily Calories</label><input type="number" id="set-cals" class="inp"></div>
+                    <div><label class="lbl">Protein (g)</label><input type="number" id="set-pro" class="inp"></div>
+                    <div><label class="lbl">Carbs (g)</label><input type="number" id="set-carb" class="inp"></div>
+                    <div><label class="lbl">Fats (g)</label><input type="number" id="set-fat" class="inp"></div>
+                </div>
+            </div>
+
+            <button onclick="saveSettings()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-md transition-all">Save Changes</button>
+            <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700 text-center">
+                 <button id="btn-logout" class="text-sm text-red-400 hover:text-red-600">Sign Out</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="picker-modal" class="fixed inset-0 z-[80] hidden">
+        <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onclick="closePicker()"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-slate-800 w-full max-w-lg rounded-2xl shadow-2xl flex flex-col max-h-[80vh]">
+            <div class="p-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                <h3 class="font-bold text-slate-800 dark:text-white">Add to <span id="picker-meal-name" class="text-emerald-500 capitalize"></span></h3>
+                <button onclick="closePicker()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="picker-list" class="p-4 overflow-y-auto space-y-2">
+                </div>
+        </div>
+    </div>
+
+    <style>
+        .lbl { @apply block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1; }
+        .inp { @apply w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-sm outline-none focus:border-slate-900 dark:focus:border-white transition-all; }
+    </style>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // CONFIG FROM USER
+        const firebaseConfig = {
+            apiKey: "AIzaSyANfPHVFmI6vTE_G37ILg9atc91-rxWrTY",
+            authDomain: "juans-macro-sys.firebaseapp.com",
+            projectId: "juans-macro-sys",
+            storageBucket: "juans-macro-sys.firebasestorage.app",
+            messagingSenderId: "144615567270",
+            appId: "1:144615567270:web:ed3fa373acf04fda226967"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const provider = new GoogleAuthProvider();
+
+        let currentUser = null;
+        let activePickerMeal = '';
+        
+        // DATA STRUCTURE
+        let appData = {
+            settings: {
+                theme: 'light',
+                goals: { cals: 2100, pro: 180, carb: 210, fat: 60 }
+            },
+            recipes: [],
+            groceries: [],
+            dailyLog: { breakfast: [], lunch: [], dinner: [], snacks: [] }
+        };
+
+        // Default Data for New Users
+        const defaultData = {
+            settings: { theme: 'light', goals: { cals: 2100, pro: 180, carb: 210, fat: 60 } },
+            recipes: [
+                { id: 1, title: "Spicy Chicken Stir Fry", time: "25 min", cals: 450, protein: 45, carbs: 35, fats: 12, tags: "Dinner, High Protein", ingredients: "- Chicken Breast\n- Rice" },
+                { id: 2, title: "Oatmeal & Whey", time: "5 min", cals: 320, protein: 28, carbs: 40, fats: 6, tags: "Breakfast", ingredients: "- Oats\n- Whey" }
+            ],
+            groceries: [],
+            dailyLog: { breakfast: [], lunch: [], dinner: [], snacks: [] }
+        };
+
+        // --- AUTH ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+                document.getElementById('app-container').classList.add('flex');
+                initDataSync();
+            } else {
+                currentUser = null;
+                document.getElementById('login-screen').classList.remove('hidden');
+                document.getElementById('app-container').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('flex');
+            }
+        });
+
+        document.getElementById('btn-login').onclick = () => signInWithPopup(auth, provider);
+        document.getElementById('btn-logout').onclick = () => signOut(auth);
+
+        // --- SYNC ---
+        function initDataSync() {
+            const userDocRef = doc(db, "users", currentUser.uid);
+            onSnapshot(userDocRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    // Merge logic to handle old data structures vs new
+                    appData = { ...defaultData, ...data, settings: { ...defaultData.settings, ...(data.settings || {}) }, dailyLog: { ...defaultData.dailyLog, ...(data.dailyLog || {}) } };
+                } else {
+                    appData = defaultData;
+                    setDoc(userDocRef, defaultData);
+                }
+                applyTheme();
+                renderAll();
+            });
+        }
+
+        async function saveToCloud() {
+            if (!currentUser) return;
+            await setDoc(doc(db, "users", currentUser.uid), appData, { merge: true });
+        }
+
+        // --- THEME & SETTINGS ---
+        window.openSettings = () => {
+            document.getElementById('set-cals').value = appData.settings.goals.cals;
+            document.getElementById('set-pro').value = appData.settings.goals.pro;
+            document.getElementById('set-carb').value = appData.settings.goals.carb;
+            document.getElementById('set-fat').value = appData.settings.goals.fat;
+            document.getElementById('settings-modal').classList.remove('hidden');
+        };
+        window.closeSettings = () => document.getElementById('settings-modal').classList.add('hidden');
+        
+        window.saveSettings = () => {
+            appData.settings.goals = {
+                cals: parseInt(document.getElementById('set-cals').value) || 0,
+                pro: parseInt(document.getElementById('set-pro').value) || 0,
+                carb: parseInt(document.getElementById('set-carb').value) || 0,
+                fat: parseInt(document.getElementById('set-fat').value) || 0
+            };
+            saveToCloud();
+            closeSettings();
+        };
+
+        window.toggleTheme = () => {
+            appData.settings.theme = appData.settings.theme === 'light' ? 'dark' : 'light';
+            applyTheme();
+            saveToCloud();
+        };
+
+        function applyTheme() {
+            if(appData.settings.theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+
+        // --- DASHBOARD LOGIC ---
+        function renderAll() {
+            renderDailyLog();
+            renderRecipes();
+            renderGroceries();
+            updateStats();
+        }
+
+        function updateStats() {
+            // Money
+            let monthlyTotal = 0;
+            appData.groceries.forEach(i => {
+                let p = parseFloat(i.price);
+                if(i.freq==='weekly') p*=4; else if(i.freq==='biweekly') p*=2;
+                monthlyTotal += p;
+            });
+            document.getElementById('stat-monthly').innerText = `$${monthlyTotal.toFixed(2)}`;
+            document.getElementById('stat-biweekly').innerText = `$${(monthlyTotal/2).toFixed(2)}`;
+
+            // Macros
+            let total = { cals: 0, pro: 0, carb: 0, fat: 0 };
+            ['breakfast','lunch','dinner','snacks'].forEach(meal => {
+                appData.dailyLog[meal].forEach(rId => {
+                    const r = appData.recipes.find(x => x.id === rId);
+                    if(r) {
+                        total.cals += parseInt(r.cals)||0;
+                        total.pro += parseInt(r.protein)||0;
+                        total.carb += parseInt(r.carbs)||0;
+                        total.fat += parseInt(r.fats)||0;
+                    }
+                });
+            });
+
+            const g = appData.settings.goals;
+            
+            // Values
+            document.getElementById('dash-cals-val').innerText = total.cals;
+            document.getElementById('dash-cals-goal').innerText = g.cals;
+            document.getElementById('dash-pro-val').innerText = total.pro;
+            document.getElementById('dash-pro-goal').innerText = g.pro;
+            document.getElementById('dash-carb-val').innerText = total.carb;
+            document.getElementById('dash-carb-goal').innerText = g.carb;
+            document.getElementById('dash-fat-val').innerText = total.fat;
+            document.getElementById('dash-fat-goal').innerText = g.fat;
+
+            // Progress Bar
+            const pct = Math.min(100, Math.round((total.cals / g.cals) * 100));
+            document.getElementById('dash-pct').innerText = pct + "%";
+            document.getElementById('dash-bar').style.width = pct + "%";
+        }
+
+        // --- DAILY LOG LOGIC ---
+        function renderDailyLog() {
+            const container = document.getElementById('log-container');
+            container.innerHTML = '';
+            ['breakfast', 'lunch', 'dinner', 'snacks'].forEach(meal => {
+                const items = appData.dailyLog[meal] || [];
+                let itemsHtml = '';
+                items.forEach((rId, idx) => {
+                    const r = appData.recipes.find(x => x.id === rId);
+                    if(r) {
+                        itemsHtml += `
+                            <div class="flex justify-between items-center text-sm bg-white dark:bg-slate-700 p-2 rounded mb-1 border border-slate-100 dark:border-slate-600">
+                                <span class="text-slate-800 dark:text-white font-medium">${r.title}</span>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-slate-500 dark:text-slate-400 text-xs">${r.cals} kcal</span>
+                                    <button onclick="removeFromLog('${meal}', ${idx})" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                const section = `
+                    <div class="bg-slate-100 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-sm font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wider">${meal}</h3>
+                            <button onclick="openPicker('${meal}')" class="text-emerald-600 dark:text-emerald-400 text-xs font-bold hover:underline">+ Add Food</button>
+                        </div>
+                        <div class="min-h-[10px]">${itemsHtml}</div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', section);
+            });
+        }
+
+        window.openPicker = (meal) => {
+            activePickerMeal = meal;
+            document.getElementById('picker-meal-name').innerText = meal;
+            const list = document.getElementById('picker-list');
+            list.innerHTML = '';
+            appData.recipes.forEach(r => {
+                const item = document.createElement('div');
+                item.className = "p-3 border border-slate-100 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 cursor-pointer flex justify-between items-center";
+                item.innerHTML = `<span class="font-medium dark:text-white">${r.title}</span><span class="text-xs text-slate-500">${r.cals} kcal</span>`;
+                item.onclick = () => {
+                    appData.dailyLog[activePickerMeal].push(r.id);
+                    saveToCloud();
+                    closePicker();
+                };
+                list.appendChild(item);
+            });
+            document.getElementById('picker-modal').classList.remove('hidden');
+        }
+
+        window.closePicker = () => document.getElementById('picker-modal').classList.add('hidden');
+        
+        window.removeFromLog = (meal, idx) => {
+            appData.dailyLog[meal].splice(idx, 1);
+            saveToCloud();
+        }
+
+        window.clearDailyLog = () => {
+            if(confirm("Clear today's log?")) {
+                appData.dailyLog = { breakfast: [], lunch: [], dinner: [], snacks: [] };
+                saveToCloud();
+            }
+        }
+
+        // --- TAB SWITCHING ---
+        window.switchTab = (tab) => {
+            ['log','recipes','grocery'].forEach(t => {
+                document.getElementById(`view-${t}`).classList.add('hidden');
+                const btn = document.getElementById(`tab-${t}`);
+                btn.classList.remove('border-slate-900', 'dark:border-emerald-500', 'text-slate-900', 'dark:text-white');
+                btn.classList.add('border-transparent', 'text-slate-500', 'dark:text-slate-400');
+            });
+            document.getElementById(`view-${tab}`).classList.remove('hidden');
+            const active = document.getElementById(`tab-${tab}`);
+            active.classList.remove('border-transparent', 'text-slate-500', 'dark:text-slate-400');
+            active.classList.add('border-slate-900', 'dark:border-emerald-500', 'text-slate-900', 'dark:text-white');
+        }
+
+        // --- RECIPE & GROCERY CRUD (Simplified for brevity, logic unchanged) ---
+        window.addGrocery = () => {
+            const name = document.getElementById('grocery-name').value;
+            const price = document.getElementById('grocery-price').value;
+            const freq = document.getElementById('grocery-freq').value;
+            const url = document.getElementById('grocery-url').value;
+            if(!name || !price) return;
+            appData.groceries.push({ id: Date.now(), name, price: parseFloat(price), freq, url });
+            document.getElementById('grocery-name').value = ''; document.getElementById('grocery-price').value = ''; document.getElementById('grocery-url').value = '';
+            saveToCloud();
+        };
+        window.renderGroceries = () => {
+            const list = document.getElementById('grocery-list'); list.innerHTML = '';
+            appData.groceries.forEach(i => {
+                let p = parseFloat(i.price), c = i.freq==='weekly'?p*4:i.freq==='biweekly'?p*2:p;
+                let badge = i.freq==='weekly'?'bg-orange-100 text-orange-700':i.freq==='biweekly'?'bg-blue-100 text-blue-700':'bg-purple-100 text-purple-700';
+                let lnk = i.url?`<a href="${i.url}" target="_blank" class="text-blue-500 ml-2"><i class="fa-solid fa-link"></i></a>`:'';
+                list.innerHTML += `<div class="grid grid-cols-12 border-b border-slate-100 dark:border-slate-700 p-3 items-center text-sm dark:text-slate-300"><div class="col-span-5 font-medium">${i.name}${lnk}</div><div class="col-span-2 text-center">$${p.toFixed(2)}</div><div class="col-span-2 text-center"><span class="${badge} text-[10px] px-2 py-1 rounded uppercase">${i.freq}</span></div><div class="col-span-2 text-right font-bold">$${c.toFixed(2)}</div><div class="col-span-1 text-center"><button onclick="delGroc(${i.id})" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-trash"></i></button></div></div>`;
+            });
+        };
+        window.delGroc = (id) => { appData.groceries = appData.groceries.filter(i => i.id!==id); saveToCloud(); };
+        
+        window.renderRecipes = () => {
+            const g = document.getElementById('recipe-grid'); g.innerHTML = '';
+            appData.recipes.forEach(r => {
+                g.innerHTML += `<div onclick="editRecipe(${r.id})" class="bg-white dark:bg-slate-800 p-5 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:shadow-md flex flex-col h-full"><div class="flex justify-between mb-3"><h3 class="font-bold text-lg dark:text-white">${r.title}</h3><i class="fa-solid fa-pen text-slate-300"></i></div><div class="text-xs text-slate-500 dark:text-slate-400 mb-4 flex gap-3"><span><i class="fa-regular fa-clock"></i> ${r.time}</span><span><i class="fa-solid fa-fire"></i> ${r.cals}</span></div><div class="mt-auto grid grid-cols-3 gap-1 text-center bg-slate-50 dark:bg-slate-900 p-2 rounded border border-slate-100 dark:border-slate-700"><div><span class="block text-[10px] text-slate-400">PRO</span><span class="text-xs font-bold text-emerald-600">${r.protein}</span></div><div><span class="block text-[10px] text-slate-400">CARB</span><span class="text-xs font-bold text-blue-600">${r.carbs}</span></div><div><span class="block text-[10px] text-slate-400">FAT</span><span class="text-xs font-bold text-orange-600">${r.fats}</span></div></div></div>`;
+            });
+        };
+
+        // Recipe Modal
+        window.openModal = () => { document.getElementById('recipe-modal').classList.remove('hidden'); setTimeout(()=>document.getElementById('recipe-modal').classList.remove('modal-hidden'),10); document.getElementById('edit-id').value=''; ['input-title','input-time','input-cals','input-protein','input-carbs','input-fats','input-tags','input-desc'].forEach(i=>document.getElementById(i).value=''); document.getElementById('btn-delete-recipe').classList.add('hidden'); };
+        window.closeModal = () => { document.getElementById('recipe-modal').classList.add('modal-hidden'); setTimeout(()=>document.getElementById('recipe-modal').classList.add('hidden'),300); };
+        window.editRecipe = (id) => {
+            const r = appData.recipes.find(x=>x.id===id); if(!r) return;
+            openModal(); document.getElementById('edit-id').value=id; document.getElementById('btn-delete-recipe').classList.remove('hidden');
+            document.getElementById('input-title').value=r.title; document.getElementById('input-time').value=r.time; document.getElementById('input-cals').value=r.cals;
+            document.getElementById('input-protein').value=r.protein; document.getElementById('input-carbs').value=r.carbs; document.getElementById('input-fats').value=r.fats;
+            document.getElementById('input-tags').value=r.tags; document.getElementById('input-desc').value=r.ingredients;
+        };
+        window.saveRecipe = () => {
+            const id = document.getElementById('edit-id').value;
+            const nr = {
+                title: document.getElementById('input-title').value, time: document.getElementById('input-time').value, cals: parseInt(document.getElementById('input-cals').value)||0,
+                protein: parseInt(document.getElementById('input-protein').value)||0, carbs: parseInt(document.getElementById('input-carbs').value)||0, fats: parseInt(document.getElementById('input-fats').value)||0,
+                tags: document.getElementById('input-tags').value, ingredients: document.getElementById('input-desc').value
+            };
+            if(!nr.title) return;
+            if(id) { const idx=appData.recipes.findIndex(x=>x.id==id); if(idx>-1) appData.recipes[idx]={id:parseInt(id),...nr}; }
+            else { appData.recipes.push({id:Date.now(),...nr}); }
+            saveToCloud(); closeModal();
+        };
+        window.deleteRecipe = () => { if(confirm("Delete?")) { appData.recipes=appData.recipes.filter(x=>x.id!=document.getElementById('edit-id').value); saveToCloud(); closeModal(); }};
+
+    </script>
+</body>
+</html>
