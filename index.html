@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juan's OS Dark</title>
+    <title>Juan's OS 5.1 (Fixed)</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,19 +17,59 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: { 
-                        // Custom Dark Palette
-                        bg: '#020617',      // Deepest Blue/Black
-                        card: '#0f172a',    // Slate 900
-                        input: '#1e293b',   // Slate 800
-                        border: '#334155',  // Slate 700
-                        primary: '#10b981', // Emerald 500
+                        bg: '#020617',      
+                        card: '#0f172a',    
+                        border: '#1e293b',  
+                        primary: '#10b981', 
                     }
                 }
             }
         }
     </script>
     <style>
-        /* Global Dark Styles */
+        /* --- BOMBPROOF DARK MODE INPUTS --- */
+        /* We use standard CSS with !important to override Browser defaults */
+        
+        .inp {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.75rem;
+            border: 1px solid #334155;
+            background-color: #1e293b !important; /* Force Dark Grey */
+            color: white !important;              /* Force White Text */
+            font-size: 0.875rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+        
+        .inp:focus {
+            border-color: #10b981;
+            background-color: #0f172a !important; /* Darker on focus */
+            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+        }
+
+        .lbl {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #94a3b8; /* Slate 400 */
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.35rem;
+        }
+
+        /* --- THE AUTOFILL HACK --- */
+        /* This stops Chrome from turning the box white when it autofills */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px #1e293b inset !important;
+            -webkit-text-fill-color: white !important;
+            caret-color: white !important;
+        }
+
+        /* Global Styles */
         body { background-color: #020617; color: #f1f5f9; }
         
         /* Animations */
@@ -39,14 +79,13 @@
         .modal-hidden .modal-panel { transform: translateX(100%); }
         .modal-visible .modal-panel { transform: translateX(0); }
         
-        /* Custom Scrollbar */
+        /* Scrollbar */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #020617; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
     </style>
 </head>
-<body class="min-h-screen p-2 md:p-6 font-sans">
+<body class="min-h-screen p-2 md:p-6 font-sans overflow-hidden">
 
     <div id="login-screen" class="fixed inset-0 z-[60] bg-[#020617] flex flex-col items-center justify-center p-6 text-center">
         <div class="bg-card p-8 rounded-2xl shadow-2xl max-w-md w-full border border-border">
@@ -56,7 +95,7 @@
             <h1 class="text-2xl font-bold text-white mb-2">Juan's OS</h1>
             <p class="text-slate-400 mb-8">Sync your Nutrition & Budget.</p>
             
-            <button id="btn-login" class="w-full bg-input border border-border text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-3 hover:bg-border transition-all shadow-sm group">
+            <button id="btn-login" class="w-full bg-[#1e293b] border border-border text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-3 hover:bg-border transition-all shadow-sm group">
                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-6 h-6" alt="Google">
                 <span>Continue with Google</span>
             </button>
@@ -107,7 +146,7 @@
         </div>
     </div>
 
-    <div id="app-container" class="max-w-6xl mx-auto bg-card min-h-[85vh] rounded-2xl shadow-xl border border-border overflow-hidden relative hidden flex flex-col mt-0 md:mt-4">
+    <div id="app-container" class="max-w-6xl mx-auto bg-card h-[85vh] md:h-auto min-h-[85vh] rounded-2xl shadow-xl border border-border overflow-hidden relative hidden flex flex-col mt-0 md:mt-4">
         
         <div class="bg-card p-4 md:p-6 border-b border-border sticky top-0 z-20">
             <div class="flex justify-between items-center mb-6">
@@ -123,14 +162,14 @@
                     </div>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="openSettings()" class="w-10 h-10 rounded-full bg-input hover:bg-border text-slate-300 transition-colors flex items-center justify-center border border-border">
+                    <button onclick="openSettings()" class="w-10 h-10 rounded-full bg-[#1e293b] hover:bg-slate-700 text-slate-300 transition-colors flex items-center justify-center border border-border">
                         <i class="fa-solid fa-gear"></i>
                     </button>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div class="bg-input/50 p-4 rounded-xl border border-border flex flex-col justify-between">
+                <div class="bg-[#1e293b]/50 p-4 rounded-xl border border-border flex flex-col justify-between">
                     <div class="flex justify-between items-start mb-2">
                         <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Monthly Expenses</p>
                         <i class="fa-solid fa-wallet text-slate-500"></i>
@@ -332,7 +371,7 @@
 
             <button onclick="saveSettings()" class="w-full bg-primary hover:bg-emerald-600 text-white font-bold py-3 rounded-xl shadow-md transition-all mb-3">Save Changes</button>
             
-            <button onclick="resetProfile()" class="w-full bg-input text-slate-300 font-semibold py-2 rounded-xl transition-all text-xs mb-6 hover:bg-border">Recalculate (Reset Profile)</button>
+            <button onclick="resetProfile()" class="w-full bg-[#1e293b] text-slate-300 font-semibold py-2 rounded-xl transition-all text-xs mb-6 hover:bg-border">Recalculate (Reset Profile)</button>
             
             <div class="pt-4 border-t border-border text-center">
                  <button id="btn-logout" class="text-sm text-red-400 hover:text-red-600">Sign Out</button>
@@ -351,12 +390,6 @@
                 </div>
         </div>
     </div>
-
-    <style>
-        .lbl { @apply block text-xs font-bold text-slate-400 uppercase mb-1; }
-        /* DARK MODE FIX: Inputs are now Slate-700 background with White Text */
-        .inp { @apply w-full px-3 py-2 rounded-lg border border-border bg-input text-white text-sm outline-none focus:border-primary focus:bg-slate-700 transition-all; }
-    </style>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -488,7 +521,7 @@
                         const name = p.product_name || "Unknown Product";
                         const cals = p.nutriments?.['energy-kcal_100g'] ? Math.round(p.nutriments['energy-kcal_100g']) + ' kcal/100g' : 'No Data';
                         const item = document.createElement('div');
-                        item.className = "flex justify-between items-center p-2 bg-input/50 rounded hover:bg-border cursor-pointer border border-border transition-colors";
+                        item.className = "flex justify-between items-center p-2 bg-[#1e293b]/50 rounded hover:bg-border cursor-pointer border border-border transition-colors";
                         item.innerHTML = `<div><div class="text-xs font-bold text-slate-200">${name}</div><div class="text-[10px] text-slate-400">${p.brands || ''} • ${cals}</div></div><div class="text-emerald-400 text-xs"><i class="fa-solid fa-plus"></i></div>`;
                         item.onclick = () => {
                             document.getElementById('grocery-name').value = name;
@@ -542,11 +575,11 @@
                     const r = appData.recipes.find(x => x.id === rId);
                     return r ? `<div class="flex justify-between items-center text-sm bg-slate-800 p-2 rounded mb-1 border border-slate-700"><span class="text-slate-200 font-medium">${r.title}</span><div class="flex items-center gap-3"><span class="text-slate-400 text-xs">${r.cals} kcal</span><button onclick="removeFromLog('${meal}', ${idx})" class="text-slate-500 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button></div></div>` : '';
                 }).join('');
-                container.insertAdjacentHTML('beforeend', `<div class="bg-input/30 p-3 rounded-xl border border-border"><div class="flex justify-between items-center mb-2"><h3 class="text-sm font-bold uppercase text-slate-400 tracking-wider">${meal}</h3><button onclick="openPicker('${meal}')" class="text-emerald-400 text-xs font-bold hover:underline">+ Add Food</button></div><div class="min-h-[10px]">${itemsHtml}</div></div>`);
+                container.insertAdjacentHTML('beforeend', `<div class="bg-[#1e293b]/30 p-3 rounded-xl border border-border"><div class="flex justify-between items-center mb-2"><h3 class="text-sm font-bold uppercase text-slate-400 tracking-wider">${meal}</h3><button onclick="openPicker('${meal}')" class="text-emerald-400 text-xs font-bold hover:underline">+ Add Food</button></div><div class="min-h-[10px]">${itemsHtml}</div></div>`);
             });
         }
 
-        window.openPicker = (meal) => { activePickerMeal = meal; document.getElementById('picker-meal-name').innerText = meal; const list = document.getElementById('picker-list'); list.innerHTML = ''; appData.recipes.forEach(r => { const item = document.createElement('div'); item.className = "p-3 border border-border rounded-lg hover:bg-input cursor-pointer flex justify-between items-center mb-2 transition-colors"; item.innerHTML = `<span class="font-medium text-white text-sm">${r.title}</span><span class="text-xs text-slate-400">${r.cals} kcal</span>`; item.onclick = () => { appData.dailyLog[activePickerMeal].push(r.id); saveToCloud(); closePicker(); }; list.appendChild(item); }); document.getElementById('picker-modal').classList.remove('hidden'); }
+        window.openPicker = (meal) => { activePickerMeal = meal; document.getElementById('picker-meal-name').innerText = meal; const list = document.getElementById('picker-list'); list.innerHTML = ''; appData.recipes.forEach(r => { const item = document.createElement('div'); item.className = "p-3 border border-border rounded-lg hover:bg-[#1e293b] cursor-pointer flex justify-between items-center mb-2 transition-colors"; item.innerHTML = `<span class="font-medium text-white text-sm">${r.title}</span><span class="text-xs text-slate-400">${r.cals} kcal</span>`; item.onclick = () => { appData.dailyLog[activePickerMeal].push(r.id); saveToCloud(); closePicker(); }; list.appendChild(item); }); document.getElementById('picker-modal').classList.remove('hidden'); }
         window.closePicker = () => document.getElementById('picker-modal').classList.add('hidden');
         window.removeFromLog = (meal, idx) => { appData.dailyLog[meal].splice(idx, 1); saveToCloud(); }
         window.clearDailyLog = () => { if(confirm("Clear log?")) { appData.dailyLog = { breakfast: [], lunch: [], dinner: [], snacks: [] }; saveToCloud(); } }
