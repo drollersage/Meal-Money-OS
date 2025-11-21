@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juan's OS 4.0</title>
+    <title>Juan's OS 4.1</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,7 +19,7 @@
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: { 
                         slate: { 850: '#1e293b', 900: '#0f172a' },
-                        darkbg: '#020617', // Deep blue-black for OLED feel
+                        darkbg: '#020617', 
                         darkcard: '#0f172a',
                         darkinput: '#1e293b'
                     }
@@ -45,15 +45,15 @@
         .dark ::-webkit-scrollbar-thumb { background: #334155; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-darkbg dark:text-slate-100 min-h-screen p-2 md:p-6 transition-colors duration-300">
+<body class="bg-slate-100 text-slate-800 dark:bg-darkbg dark:text-slate-100 min-h-screen p-2 md:p-6 transition-colors duration-300">
 
     <div id="login-screen" class="fixed inset-0 z-[60] bg-slate-900 flex flex-col items-center justify-center p-6 text-center">
         <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-2xl max-w-md w-full border border-slate-100 dark:border-slate-700">
             <div class="bg-emerald-500 text-white w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl shadow-lg animate-bounce">
                 ⚡
             </div>
-            <h1 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Juan's OS 4.0</h1>
-            <p class="text-slate-500 dark:text-slate-400 mb-8">Sync your Nutrition & Budget across devices.</p>
+            <h1 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Juan's OS 4.1</h1>
+            <p class="text-slate-500 dark:text-slate-400 mb-8">Sync your Nutrition & Budget.</p>
             
             <button id="btn-login" class="w-full bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-white font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-600 transition-all shadow-sm group">
                 <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-6 h-6" alt="Google">
@@ -63,22 +63,23 @@
         </div>
     </div>
 
-    <div id="onboarding-modal" class="fixed inset-0 z-[90] hidden bg-slate-900 bg-opacity-95 flex items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white dark:bg-darkcard w-full max-w-lg rounded-2xl shadow-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700">
-            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Welcome, Athlete! 🏋️‍♂️</h2>
-            <p class="text-slate-500 dark:text-slate-400 mb-6 text-sm">Let's calculate your exact macro needs based on your body stats.</p>
+    <div id="onboarding-modal" class="fixed inset-0 z-[90] hidden bg-slate-900/90 flex items-center justify-center p-4 backdrop-blur-md">
+        <div class="bg-white dark:bg-darkcard w-full max-w-2xl rounded-2xl shadow-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700 overflow-y-auto max-h-[90vh]">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Welcome! 👋</h2>
+            <p class="text-slate-500 dark:text-slate-400 mb-6 text-sm">Let's calculate your exact macro needs based on your stats.</p>
             
-            <div class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-5">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div><label class="lbl">Gender</label><select id="ob-gender" class="inp"><option value="male">Male</option><option value="female">Female</option></select></div>
                     <div><label class="lbl">Age</label><input type="number" id="ob-age" class="inp" placeholder="25"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div><label class="lbl">Weight (lbs)</label><input type="number" id="ob-weight" class="inp" placeholder="170"></div>
-                    <div><label class="lbl">Height (ft/in)</label>
-                        <div class="flex gap-2">
-                            <input type="number" id="ob-ft" class="inp" placeholder="5">
-                            <input type="number" id="ob-in" class="inp" placeholder="10">
+                    <div>
+                        <label class="lbl">Height</label>
+                        <div class="flex gap-3">
+                            <div class="flex-1"><input type="number" id="ob-ft" class="inp" placeholder="5"><span class="text-[10px] text-slate-400 block mt-1">Feet</span></div>
+                            <div class="flex-1"><input type="number" id="ob-in" class="inp" placeholder="10"><span class="text-[10px] text-slate-400 block mt-1">Inches</span></div>
                         </div>
                     </div>
                 </div>
@@ -101,13 +102,13 @@
                     </select>
                 </div>
             </div>
-            <button onclick="completeOnboarding()" class="w-full mt-8 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all transform hover:scale-[1.02]">Calculate & Start</button>
+            <button onclick="completeOnboarding()" class="w-full mt-8 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all transform hover:scale-[1.01]">Calculate & Start</button>
         </div>
     </div>
 
-    <div id="app-container" class="max-w-6xl mx-auto bg-white dark:bg-darkcard min-h-[85vh] rounded-2xl shadow-xl border border-slate-100 dark:border-slate-800 overflow-hidden relative hidden flex flex-col transition-colors">
+    <div id="app-container" class="max-w-6xl mx-auto bg-white dark:bg-darkcard min-h-[85vh] rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden relative hidden flex flex-col transition-colors mt-0 md:mt-4">
         
-        <div class="bg-white dark:bg-darkcard p-4 md:p-6 border-b border-slate-100 dark:border-slate-800 sticky top-0 z-20">
+        <div class="bg-white dark:bg-darkcard p-4 md:p-6 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-20">
             <div class="flex justify-between items-center mb-6">
                 <div class="flex items-center gap-3">
                     <div class="bg-slate-900 dark:bg-emerald-600 text-white w-10 h-10 rounded-lg flex items-center justify-center shadow-md transition-colors">
@@ -121,7 +122,7 @@
                     </div>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="openSettings()" class="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                    <button onclick="openSettings()" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors flex items-center justify-center border border-slate-200 dark:border-slate-700">
                         <i class="fa-solid fa-gear"></i>
                     </button>
                 </div>
@@ -181,7 +182,7 @@
             </div>
         </div>
 
-        <div class="flex border-b border-slate-100 dark:border-slate-800 px-6 bg-white dark:bg-darkcard transition-colors">
+        <div class="flex border-b border-slate-200 dark:border-slate-800 px-6 bg-white dark:bg-darkcard transition-colors">
             <button onclick="switchTab('log')" id="tab-log" class="px-4 md:px-6 py-3 text-sm font-medium border-b-2 border-slate-900 dark:border-emerald-500 text-slate-900 dark:text-white transition-colors">
                 <i class="fa-solid fa-calendar-day mr-2"></i>Daily Log
             </button>
@@ -363,7 +364,8 @@
 
     <style>
         .lbl { @apply block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase mb-1; }
-        .inp { @apply w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-darkinput text-slate-800 dark:text-slate-100 text-sm outline-none focus:border-slate-900 dark:focus:border-emerald-500 transition-all; }
+        /* Updated Inputs: Distinct background in Light Mode, Readable in Dark Mode */
+        .inp { @apply w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 text-slate-900 dark:text-white text-sm outline-none focus:border-slate-900 dark:focus:border-emerald-500 focus:bg-white dark:focus:bg-slate-600 transition-all; }
         .btn-primary { @apply bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors shadow-sm; }
     </style>
 
@@ -606,7 +608,7 @@
                     const r = appData.recipes.find(x => x.id === rId);
                     return r ? `<div class="flex justify-between items-center text-sm bg-white dark:bg-slate-700 p-2 rounded mb-1 border border-slate-100 dark:border-slate-600"><span class="text-slate-800 dark:text-white font-medium">${r.title}</span><div class="flex items-center gap-3"><span class="text-slate-500 dark:text-slate-400 text-xs">${r.cals} kcal</span><button onclick="removeFromLog('${meal}', ${idx})" class="text-slate-300 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button></div></div>` : '';
                 }).join('');
-                container.insertAdjacentHTML('beforeend', `<div class="bg-slate-100 dark:bg-slate-800/30 p-3 rounded-xl border border-slate-200 dark:border-slate-700"><div class="flex justify-between items-center mb-2"><h3 class="text-sm font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wider">${meal}</h3><button onclick="openPicker('${meal}')" class="text-emerald-600 dark:text-emerald-400 text-xs font-bold hover:underline">+ Add Food</button></div><div class="min-h-[10px]">${itemsHtml}</div></div>`);
+                container.insertAdjacentHTML('beforeend', `<div class="bg-slate-50 dark:bg-slate-800/30 p-3 rounded-xl border border-slate-200 dark:border-slate-700"><div class="flex justify-between items-center mb-2"><h3 class="text-sm font-bold uppercase text-slate-500 dark:text-slate-400 tracking-wider">${meal}</h3><button onclick="openPicker('${meal}')" class="text-emerald-600 dark:text-emerald-400 text-xs font-bold hover:underline">+ Add Food</button></div><div class="min-h-[10px]">${itemsHtml}</div></div>`);
             });
         }
 
